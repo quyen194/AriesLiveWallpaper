@@ -300,7 +300,7 @@ class GallerySettingsActivity : AppCompatActivity(),
         }.distinctUntilChanged().onEach {
             invalidateOptionsMenu()
         }.launchWhenStartedIn(this)
-        GalleryScanWorker.enqueueRescan(this)
+        GalleryScanWorker.enqueuePeriodic(this)
     }
 
     private fun requestPhotos() {
