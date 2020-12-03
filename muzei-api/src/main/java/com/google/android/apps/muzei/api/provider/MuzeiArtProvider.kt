@@ -70,6 +70,7 @@ import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_GET_D
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_GET_LOAD_INFO
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_GET_VERSION
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_MARK_ARTWORK_INVALID
+import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_DELETE_ARTWORK
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_MARK_ARTWORK_LOADED
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_OPEN_ARTWORK_INFO
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_REQUEST_LOAD
@@ -80,6 +81,7 @@ import com.google.android.apps.muzei.api.internal.putRecentIds
 import com.google.android.apps.muzei.api.provider.MuzeiArtProvider.Companion.ACCESS_PERMISSION
 import com.google.android.apps.muzei.api.provider.MuzeiArtProvider.Companion.ACTION_MUZEI_ART_PROVIDER
 import com.google.android.apps.muzei.api.provider.MuzeiArtProvider.Companion.EXTRA_FROM_MUZEI
+import com.google.android.apps.muzei.api.utils.RealPathUtil
 import org.json.JSONArray
 import java.io.File
 import java.io.FileInputStream
@@ -391,6 +393,24 @@ public abstract class MuzeiArtProvider : ContentProvider(), ProviderClient {
                 METHOD_MARK_ARTWORK_INVALID -> query(Uri.parse(arg), null, null, null, null).use { data ->
                     if (data.moveToNext()) {
                         onInvalidArtwork(Artwork.fromCursor(data))
+                    }
+                }
+                METHOD_DELETE_ARTWORK -> query(Uri.parse(arg), null, null, null, null).use { data ->
+                    if (data.moveToNext()) {
+                        var artwork = Artwork.fromCursor(data)
+                        val artworkUri = ContentUris.withAppendedId(contentUri, artwork.id)
+                        var filePath = RealPathUtil.getRealPath(context, Uri.parse(artwork.token))
+                        val file = if (filePath != null) File(filePath) else null
+                        if (file != null && file.exists()) {
+                            if (!file.delete()) {
+                                if (Log.isLoggable(TAG, Log.INFO)) {
+                                    Log.i(TAG, "Unable to delete $file")
+                                }
+                            }
+                            else {
+                                delete(artworkUri, null, null)
+                            }
+                        }
                     }
                 }
                 METHOD_MARK_ARTWORK_LOADED -> query(contentUri, null, null, null, null).use { data ->

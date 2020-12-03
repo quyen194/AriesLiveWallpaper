@@ -59,6 +59,7 @@
 
     <string name="action_next_artwork">Next artwork</string>
     <string name="action_next_artwork_condensed">Next</string>
+    <string name="action_delete_artwork">Delete artwork</string>
     <string name="action_user_command">More</string>
     <string name="action_user_command_prompt">Choose action</string>
     <string name="action_artwork_info">Artwork info</string>

@@ -38,6 +38,7 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     api "androidx.core:core:1.1.0"
     implementation "androidx.exifinterface:exifinterface:1.2.0"
+    implementation 'androidx.loader:loader:1.1.0'
 }
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion

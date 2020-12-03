@@ -26,6 +26,7 @@ public object ProtocolConstants {
     public const val DEFAULT_VERSION: Int = 310000
     public const val METHOD_REQUEST_LOAD: String = PREFIX + "REQUEST_LOAD"
     public const val METHOD_MARK_ARTWORK_INVALID: String = PREFIX + "MARK_ARTWORK_INVALID"
+    public const val METHOD_DELETE_ARTWORK: String = PREFIX + "DELETE_ARTWORK"
     public const val METHOD_MARK_ARTWORK_LOADED: String = PREFIX + "MARK_ARTWORK_LOADED"
     public const val METHOD_GET_LOAD_INFO: String = PREFIX + "GET_LOAD_INFO"
     public const val KEY_MAX_LOADED_ARTWORK_ID: String = PREFIX + "MAX_LOADED_ARTWORK_ID"

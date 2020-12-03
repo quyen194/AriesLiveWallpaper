@@ -16,6 +16,7 @@
 
 package com.google.android.apps.muzei
 
+import android.Manifest
 import android.app.Activity
 import android.app.Application
 import android.app.Notification
@@ -24,6 +25,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
@@ -32,6 +34,7 @@ import androidx.preference.PreferenceManager
 import com.google.android.apps.muzei.notifications.NotificationSettingsDialogFragment
 import com.google.android.apps.muzei.render.MuzeiRendererFragment
 import com.google.android.apps.muzei.settings.EffectsFragment
+import com.google.android.apps.muzei.util.PermissionsUtil
 import com.google.android.apps.muzei.util.launchWhenStartedIn
 import com.google.android.apps.muzei.wallpaper.WallpaperActiveState
 import com.google.android.apps.muzei.wallpaper.initializeWallpaperActiveState
@@ -157,6 +160,15 @@ class MuzeiActivity : AppCompatActivity() {
             }
             NotificationSettingsDialogFragment.showSettings(this,
                     supportFragmentManager)
+        }
+
+        var permissions = arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.INTERNET)
+
+        if (!PermissionsUtil.hasPermissions(this, permissions)) {
+            ActivityCompat.requestPermissions(this, permissions, 0)
         }
     }
 

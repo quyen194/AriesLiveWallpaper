@@ -19,7 +19,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="net.nurik.roman.muzei">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <application
+        android:requestLegacyExternalStorage="true"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <meta-data
             android:name="firebase_analytics_collection_deactivated"
