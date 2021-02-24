@@ -24,6 +24,7 @@ import android.provider.BaseColumns
 import android.util.Log
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
@@ -34,6 +35,7 @@ import androidx.work.WorkerParameters
 import com.google.android.apps.muzei.api.internal.ProtocolConstants
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.KEY_MAX_LOADED_ARTWORK_ID
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.KEY_RECENT_ARTWORK_IDS
+import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_DELETE_ARTWORK
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_GET_LOAD_INFO
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_MARK_ARTWORK_LOADED
 import com.google.android.apps.muzei.api.internal.ProtocolConstants.METHOD_REQUEST_LOAD
@@ -71,6 +73,17 @@ class ArtworkLoadWorker(
             val workManager = WorkManager.getInstance(context)
             workManager.enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE,
                     OneTimeWorkRequestBuilder<ArtworkLoadWorker>().build())
+        }
+
+        internal fun enqueueDelete(context: Context, to_delete_img: String) {
+            var worker = OneTimeWorkRequestBuilder<ArtworkLoadWorker>()
+            val data = Data.Builder()
+            data.putBoolean("delete_current", true)
+            data.putString("image_path_to_delete", to_delete_img)
+            worker.setInputData(data.build())
+
+            val workManager = WorkManager.getInstance(context)
+            workManager.enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, worker.build())
         }
 
         internal fun enqueuePeriodic(
@@ -140,6 +153,9 @@ class ArtworkLoadWorker(
                                         Log.d(TAG, "Out of new artwork, requesting load from $authority")
                                     }
                                     client.call(METHOD_REQUEST_LOAD)
+                                }
+                                if (inputData.getBoolean("delete_current", false)) {
+                                    client.call(METHOD_DELETE_ARTWORK, inputData.getString("image_path_to_delete"))
                                 }
                                 return@withContext Result.success()
                             }
@@ -218,6 +234,9 @@ class ArtworkLoadWorker(
                                         Log.d(TAG, "Loaded $imageUri into id $artworkId")
                                     }
                                     client.call(METHOD_MARK_ARTWORK_LOADED, imageUri.toString())
+                                    if (inputData.getBoolean("delete_current", false)) {
+                                        client.call(METHOD_DELETE_ARTWORK, inputData.getString("image_path_to_delete"))
+                                    }
                                     return@withContext Result.success()
                                 }
                             }
