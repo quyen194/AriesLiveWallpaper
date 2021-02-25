@@ -170,15 +170,12 @@ class MuzeiWallpaperService : GLWallpaperService(), LifecycleOwner {
                     return true
                 }
 
-                validDoubleTap = true // processed in onCommand/COMMAND_TAP
-
                 doubleTapTimeout?.cancel()
-                val timeout = ViewConfiguration.getDoubleTapTimeout().toLong()
                 doubleTapTimeout = lifecycleScope.launch {
-                    delay(timeout)
-                    queueEvent {
-                        validDoubleTap = false
-                    }
+                    val prefs = Prefs.getSharedPreferences(this@MuzeiWallpaperService)
+                    val doubleTapValue = prefs.getString(Prefs.PREF_DOUBLE_TAP,
+                            null) ?: Prefs.PREF_TAP_ACTION_TEMP
+                    triggerTapAction(doubleTapValue, "gesture_double_tap")
                 }
                 return true
             }
@@ -298,26 +295,6 @@ class MuzeiWallpaperService : GLWallpaperService(), LifecycleOwner {
         override fun onZoomChanged(zoom: Float) {
             super.onZoomChanged(zoom)
             renderer.setZoom(zoom)
-        }
-
-        override fun onCommand(
-                action: String?,
-                x: Int,
-                y: Int,
-                z: Int,
-                extras: Bundle?,
-                resultRequested: Boolean
-        ): Bundle? {
-            // validDoubleTap previously set in the gesture listener
-            if (WallpaperManager.COMMAND_TAP == action && validDoubleTap) {
-                val prefs = Prefs.getSharedPreferences(this@MuzeiWallpaperService)
-                val doubleTapValue = prefs.getString(Prefs.PREF_DOUBLE_TAP,
-                        null) ?: Prefs.PREF_TAP_ACTION_TEMP
-                triggerTapAction(doubleTapValue, "gesture_double_tap")
-                // Reset the flag
-                validDoubleTap = false
-            }
-            return super.onCommand(action, x, y, z, extras, resultRequested)
         }
 
         private fun triggerTapAction(action: String, type: String) {
