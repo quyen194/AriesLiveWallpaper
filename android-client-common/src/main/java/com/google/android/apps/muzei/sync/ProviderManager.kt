@@ -286,4 +286,11 @@ class ProviderManager private constructor(private val context: Context)
     fun nextArtwork() {
         ArtworkLoadWorker.enqueueNext(context)
     }
+
+    suspend fun deleteArtwork(imageUri: Uri) {
+        ContentProviderClientCompat.getClient(
+                context, imageUri)?.use { client ->
+            client.call(ProtocolConstants.METHOD_DELETE_ARTWORK, imageUri.toString())
+        }
+    }
 }

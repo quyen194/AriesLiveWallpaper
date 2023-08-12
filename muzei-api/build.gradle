@@ -39,6 +39,7 @@ allprojects { ext."signing.secretKeyRingFile" = props["signing.secretKeyRingFile
 dependencies {
     api libs.api.core
     implementation libs.api.exifinterface
+    implementation 'androidx.loader:loader:1.1.0'
 }
 android {
     namespace 'com.google.android.apps.muzei.api'

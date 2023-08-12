@@ -16,8 +16,10 @@
 
 package com.google.android.apps.muzei
 
+import android.app.AlertDialog
 import android.app.Application
 import android.app.PendingIntent
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -343,6 +345,7 @@ class ArtDetailFragment : Fragment(R.layout.art_detail_fragment) {
         viewModel.currentProvider.collectIn(viewLifecycleOwner) { provider ->
             val supportsNextArtwork = provider?.supportsNextArtwork == true
             binding.nextArtwork.isVisible = supportsNextArtwork
+            binding.deleteArtwork.isVisible = supportsNextArtwork
         }
 
         viewModel.currentArtwork.collectIn(viewLifecycleOwner) { currentArtwork ->
@@ -359,6 +362,34 @@ class ArtDetailFragment : Fragment(R.layout.art_detail_fragment) {
                     viewModel.currentArtwork.value?.openArtworkInfo(context)
                 }
             }
+
+            binding.deleteArtwork.setOnClickListener {
+                Firebase.analytics.logEvent("delete_artwork") {
+                    param(FirebaseAnalytics.Param.CONTENT_TYPE, "art_detail")
+                }
+
+                var currentArtwork = viewModel.currentArtwork.value
+                if (currentArtwork != null) {
+                    val dialogClickListener: DialogInterface.OnClickListener = DialogInterface.OnClickListener { _, which ->
+                        when (which) {
+                            DialogInterface.BUTTON_POSITIVE -> {
+                                lifecycleScope.launch {
+                                    ProviderManager.getInstance(requireContext()).nextArtwork()
+                                    showFakeLoading()
+                                    ProviderManager.getInstance(requireContext()).deleteArtwork(currentArtwork.imageUri)
+                                }
+                            }
+                        }
+                    }
+
+                    val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                    builder.setMessage("Are You Sure To DELETE?")
+                            .setPositiveButton("YES", dialogClickListener)
+                            .setNegativeButton("NO", dialogClickListener)
+                            .show()
+                }
+            }
+            TooltipCompat.setTooltipText(binding.deleteArtwork, binding.deleteArtwork.contentDescription)
 
             if (binding.backgroundImageContainer.isVisible) {
                 viewLifecycleOwner.lifecycleScope.launch {
