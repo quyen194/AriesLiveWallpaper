@@ -311,7 +311,7 @@ class GallerySettingsActivity : AppCompatActivity(),
         }.distinctUntilChanged().collectIn(this) {
             invalidateMenu()
         }
-        GalleryScanWorker.enqueueRescan(this)
+        GalleryScanWorker.enqueuePeriodic(this)
     }
 
     private fun requestPhotos() {

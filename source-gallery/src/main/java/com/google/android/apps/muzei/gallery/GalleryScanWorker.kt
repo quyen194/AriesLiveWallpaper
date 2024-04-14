@@ -34,7 +34,11 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import androidx.work.CoroutineWorker
+import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -52,6 +56,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.LinkedList
 import kotlin.random.Random
+import java.util.concurrent.TimeUnit
 
 class GalleryScanWorker(
         context: Context,
@@ -82,6 +87,24 @@ class GalleryScanWorker(
                     ExistingWorkPolicy.REPLACE,
                     OneTimeWorkRequestBuilder<GalleryScanWorker>()
                             .build())
+        }
+
+        fun enqueuePeriodic(context: Context) {
+            val workManager = WorkManager.getInstance(context)
+            workManager.enqueueUniquePeriodicWork("GalleryScanPeriodic",
+                    ExistingPeriodicWorkPolicy.REPLACE,
+                    PeriodicWorkRequestBuilder<GalleryScanWorker>(
+                            15, TimeUnit.MINUTES,
+                            1, TimeUnit.MINUTES)
+                            .setConstraints(Constraints.Builder()
+                                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                                    .build())
+                            .build())
+        }
+
+        fun cancelPeriodic(context: Context) {
+            val workManager = WorkManager.getInstance(context)
+            workManager.cancelUniqueWork("GalleryScanPeriodic")
         }
     }
 
